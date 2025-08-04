@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Agenda App</title>
+  <link rel="manifest" href="manifest.json">
+  <style>
+    body {
+      margin: 0;
+      font-family: Helvetica, sans-serif;
+      background-color: #2e2e2e;
+      color: #ffffff;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+    .container {
+      background-color: #3c3c3c;
+      padding: 2rem;
+      border-radius: 12px;
+      box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+      width: 300px;
+    }
+    input, textarea {
+      width: 100%;
+      margin-bottom: 1rem;
+      padding: 0.5rem;
+      border: none;
+      border-radius: 6px;
+      font-family: Helvetica, sans-serif;
+      background-color: #4a4a4a;
+      color: #fff;
+    }
+    .button-container {
+      display: flex;
+      justify-content: space-between;
+    }
+    .icon-button {
+      width: 48px;
+      height: 48px;
+      border: none;
+      border-radius: 50%;
+      background-color: #ffffff;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      cursor: pointer;
+    }
+    .icon-button img {
+      width: 24px;
+      height: 24px;
+    }
+    .icon-button:hover {
+      background-color: #cccccc;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <textarea id="description" placeholder="Descrição da atividade"></textarea>
+    <input type="text" id="title" placeholder="Nome da atividade" />
+    <input type="datetime-local" id="datetime" />
+    <div class="button-container">
+      <button class="icon-button" onclick="addActivity()">
+        <img src="https://img.icons8.com/ios-filled/50/000000/calendar.png" alt="Agenda Icon" />
+      </button>
+      <button class="icon-button" onclick="startVoiceInput()">
+        <img src="https://img.icons8.com/ios-filled/50/000000/microphone.png" alt="Mic Icon" />
+      </button>
+    </div>
+  </div>
+  <script>
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('service-worker.js')
+        .then(reg => console.log('Service Worker registrado'))
+        .catch(err => console.error('Erro no Service Worker:', err));
+    }
+
+    function addActivity() {
+      const description = document.getElementById('description').value;
+      const title = document.getElementById('title').value;
+      const datetime = document.getElementById('datetime').value;
+
+      if (!description || !title || !datetime) {
+        alert('Preencha todos os campos.');
+        return;
+      }
+
+      const event = {
+        summary: title,
+        description: description,
+        start: { dateTime: new Date(datetime).toISOString() },
+        end: { dateTime: new Date(new Date(datetime).getTime() + 3600000).toISOString() },
+      };
+
+      console.log('Evento criado:', event);
+      alert('Evento salvo localmente (versão PWA).');
+    }
+
+    function startVoiceInput() {
+      const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+      recognition.lang = 'pt-BR';
+
+      recognition.onresult = function(event) {
+        const transcript = event.results[0][0].transcript;
+        document.getElementById('description').value = transcript;
+      };
+
+      recognition.onerror = function(event) {
+        alert('Erro ao capturar voz: ' + event.error);
+      };
+
+      recognition.start();
+    }
+  </script>
+</body>
+</html>
